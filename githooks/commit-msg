@@ -1,0 +1,11 @@
+#!/bin/bash
+
+REGEX_CONVENTIONAL_COMMIT='^(build|chore|ci|docs|feat|fix|style|refactor|revert|perf|test)!?(\([a-z]+\))?:'
+
+commit_msg=$(<"$1") # The first argument ($1) is the temporary file containing the commit message of the user.
+if ! [[ $commit_msg =~ $REGEX_CONVENTIONAL_COMMIT ]]
+then
+  echo "Commit message does not follow the format of a conventional commit!"
+  echo "Regex: '$REGEX_CONVENTIONAL_COMMIT'"
+  exit 1
+fi
