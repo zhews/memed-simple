@@ -6,6 +6,7 @@ type User struct {
 	Id           uuid.UUID
 	Username     string
 	Name         string
+	Admin        bool
 	PasswordHash []byte
 	CreatedAt    int64
 	UpdatedAt    int64

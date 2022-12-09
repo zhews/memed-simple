@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const queryBaseGetUserByUsername = "SELECT id, username, name, password_hash, created_at, updated_at FROM memed_user"
+const queryBaseGetUserByUsername = "SELECT id, username, name, admin, password_hash, created_at, updated_at FROM memed_user"
 
 func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 	db, mock, err := sqlmock.New()
@@ -22,6 +22,7 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 		Id:           uuid.New(),
 		Username:     "zhews",
 		Name:         "First Last",
+		Admin:        false,
 		PasswordHash: []byte{},
 		CreatedAt:    now,
 		UpdatedAt:    now,
@@ -30,10 +31,11 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 	mock.ExpectQuery(queryBaseGetUserByUsername).
 		WithArgs(user.Username).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "username", "name", "password_hash", "created_at", "updated_at"}).AddRow(
+			sqlmock.NewRows([]string{"id", "username", "name", "admin", "password_hash", "created_at", "updated_at"}).AddRow(
 				user.Id,
 				user.Username,
 				user.Name,
+				user.Admin,
 				user.PasswordHash,
 				user.CreatedAt,
 				user.UpdatedAt,
@@ -107,12 +109,13 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 		Id:           uuid.New(),
 		Username:     "zhews",
 		Name:         "First Last",
+		Admin:        true,
 		PasswordHash: []byte{},
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
 	mock.ExpectExec(queryBaseInsertUser).
-		WithArgs(user.Id, user.Username, user.Name, user.PasswordHash, user.CreatedAt, user.UpdatedAt).
+		WithArgs(user.Id, user.Username, user.Name, user.Admin, user.PasswordHash, user.CreatedAt, user.UpdatedAt).
 		WillReturnResult(sqlmock.NewResult(0, 0))
 	type fields struct {
 		DB *sql.DB
