@@ -9,8 +9,6 @@ import (
 	"testing"
 )
 
-// These tests require the test environment to be running. Take a look at the "test" folder for more information.
-
 const queryBaseGetUserByUsername = "SELECT id, username, name, password_hash FROM memed_user"
 
 func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
