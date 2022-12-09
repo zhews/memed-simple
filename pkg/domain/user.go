@@ -8,3 +8,8 @@ type User struct {
 	Name         string
 	PasswordHash string
 }
+
+type UserRepository interface {
+	GetByUsername(username string) (User, error)
+	Insert(user User) error
+}
