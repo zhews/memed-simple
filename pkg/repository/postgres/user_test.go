@@ -7,30 +7,36 @@ import (
 	"github.com/zhews/memed-simple/pkg/domain"
 	"reflect"
 	"testing"
+	"time"
 )
 
-const queryBaseGetUserByUsername = "SELECT id, username, name, password_hash FROM memed_user"
+const queryBaseGetUserByUsername = "SELECT id, username, name, password_hash, created_at, updated_at FROM memed_user"
 
 func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.FailNow()
 	}
+	now := time.Now().Unix()
 	user := domain.User{
 		Id:           uuid.New(),
 		Username:     "zhews",
 		Name:         "First Last",
-		PasswordHash: "password",
+		PasswordHash: []byte{},
+		CreatedAt:    now,
+		UpdatedAt:    now,
 	}
 	nonExistingUser := "nonExisting"
 	mock.ExpectQuery(queryBaseGetUserByUsername).
 		WithArgs(user.Username).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "username", "name", "password_hash"}).AddRow(
+			sqlmock.NewRows([]string{"id", "username", "name", "password_hash", "created_at", "updated_at"}).AddRow(
 				user.Id,
 				user.Username,
 				user.Name,
 				user.PasswordHash,
+				user.CreatedAt,
+				user.UpdatedAt,
 			),
 		)
 	mock.ExpectQuery(queryBaseGetUserByUsername).
@@ -96,14 +102,17 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 	if err != nil {
 		t.FailNow()
 	}
+	now := time.Now().Unix()
 	user := domain.User{
 		Id:           uuid.New(),
 		Username:     "zhews",
 		Name:         "First Last",
-		PasswordHash: "password",
+		PasswordHash: []byte{},
+		CreatedAt:    now,
+		UpdatedAt:    now,
 	}
 	mock.ExpectExec(queryBaseInsertUser).
-		WithArgs(user.Id, user.Username, user.Name, user.PasswordHash).
+		WithArgs(user.Id, user.Username, user.Name, user.PasswordHash, user.CreatedAt, user.UpdatedAt).
 		WillReturnResult(sqlmock.NewResult(0, 0))
 	type fields struct {
 		DB *sql.DB

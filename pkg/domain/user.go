@@ -6,7 +6,9 @@ type User struct {
 	Id           uuid.UUID
 	Username     string
 	Name         string
-	PasswordHash string
+	PasswordHash []byte
+	CreatedAt    int64
+	UpdatedAt    int64
 }
 
 type UserRepository interface {
