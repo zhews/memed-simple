@@ -1,4 +1,7 @@
+test:
+	go test ./...
+
 hooks:
 	cd .git/hooks; ln -s ../../githooks/* .
 
-.PHONY: hooks
+.PHONY: test hooks
