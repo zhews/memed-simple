@@ -10,7 +10,7 @@ const (
 	hashFormat = "$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s"
 )
 
-type Argon2IDParameters struct {
+type Argon2IDParameter struct {
 	SaltSize   int
 	Iterations uint32
 	Memory     uint32
@@ -18,7 +18,7 @@ type Argon2IDParameters struct {
 	KeyLength  uint32
 }
 
-func HashPassword(password string, parameters Argon2IDParameters) (string, error) {
+func HashPassword(password string, parameters Argon2IDParameter) (string, error) {
 	salt, err := generateRandomBytes(parameters.SaltSize)
 	if err != nil {
 		return "", err
@@ -30,6 +30,6 @@ func HashPassword(password string, parameters Argon2IDParameters) (string, error
 	return encodedHash, nil
 }
 
-func encodeHash(version int, parameters Argon2IDParameters, salt, hash string) string {
+func encodeHash(version int, parameters Argon2IDParameter, salt, hash string) string {
 	return fmt.Sprintf(hashFormat, version, parameters.Memory, parameters.Iterations, parameters.Threads, salt, hash)
 }

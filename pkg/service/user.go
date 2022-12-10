@@ -10,7 +10,7 @@ import (
 )
 
 type UserService struct {
-	Argon2IDParameters cryptography.Argon2IDParameters
+	Argon2IDParameters cryptography.Argon2IDParameter
 	Repository         domain.UserRepository
 }
 
