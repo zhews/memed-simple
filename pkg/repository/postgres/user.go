@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/zhews/memed-simple/pkg/domain"
 	"github.com/zhews/memed-simple/pkg/repository"
@@ -19,6 +20,9 @@ func (urp *UserRepositoryPostgres) GetByUsername(username string) (domain.User, 
 	row := urp.Conn.QueryRow(context.Background(), queryGetUserByUsername, username)
 	var user domain.User
 	err := row.Scan(&user.Id, &user.Username, &user.Name, &user.Admin, &user.PasswordHash, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil && errors.Is(err, pgx.ErrNoRows) {
+		return user, repository.ErrorNoRows
+	}
 	return user, err
 }
 

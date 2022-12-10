@@ -1,11 +1,11 @@
 package service
 
 import (
-	"database/sql"
 	"errors"
 	"github.com/google/uuid"
 	"github.com/zhews/memed-simple/pkg/cryptography"
 	"github.com/zhews/memed-simple/pkg/domain"
+	"github.com/zhews/memed-simple/pkg/repository"
 	"time"
 )
 
@@ -13,8 +13,6 @@ type UserService struct {
 	Argon2IDParameters cryptography.Argon2IDParameters
 	Repository         domain.UserRepository
 }
-
-var ErrorInvalidCredentials = errors.New("invalid credentials")
 
 func (us *UserService) Register(username, name, password string) error {
 	passwordHash, err := cryptography.HashPassword(password, us.Argon2IDParameters)
@@ -39,25 +37,28 @@ func (us *UserService) Register(username, name, password string) error {
 	return err
 }
 
-func (us *UserService) Login(username, password string) error {
+func (us *UserService) Login(username, password string) (domain.User, error) {
 	user, err := us.Repository.GetByUsername(username)
 	if err != nil {
-		return err
+		if errors.Is(err, repository.ErrorNoRows) {
+			return domain.User{}, ErrorUserNotFound
+		}
+		return domain.User{}, err
 	}
 	correctPasswordHash, err := cryptography.Decrypt([]byte{}, user.PasswordHash)
 	if err != nil {
-		return err
+		return domain.User{}, err
 	}
 	passwordHash, err := cryptography.HashPassword(password, us.Argon2IDParameters)
 	if correctPasswordHash != passwordHash {
-		return ErrorInvalidCredentials
+		return domain.User{}, ErrorInvalidCredentials
 	}
-	return nil
+	return user, nil
 }
 
 func (us *UserService) CheckUsername(username string) (bool, error) {
 	_, err := us.Repository.GetByUsername(username)
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
+	if err != nil && errors.Is(err, repository.ErrorNoRows) {
 		return true, nil
 	}
 	return false, err
