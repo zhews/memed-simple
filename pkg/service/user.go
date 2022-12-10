@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"github.com/google/uuid"
+	"github.com/zhews/memed-simple/pkg/config"
 	"github.com/zhews/memed-simple/pkg/cryptography"
 	"github.com/zhews/memed-simple/pkg/domain"
 	"github.com/zhews/memed-simple/pkg/repository"
@@ -10,16 +11,16 @@ import (
 )
 
 type UserService struct {
-	Argon2IDParameters cryptography.Argon2IDParameter
-	Repository         domain.UserRepository
+	Config     config.UserConfig
+	Repository domain.UserRepository
 }
 
 func (us *UserService) Register(username, name, password string) error {
-	passwordHash, err := cryptography.HashPassword(password, us.Argon2IDParameters)
+	passwordHash, err := cryptography.HashPassword(password, us.Config.Argon2IDParameter)
 	if err != nil {
 		return err
 	}
-	encryptedPasswordHash, err := cryptography.Encrypt([]byte{}, []byte(passwordHash))
+	encryptedPasswordHash, err := cryptography.Encrypt([]byte(us.Config.EncryptionKey), []byte(passwordHash))
 	if err != nil {
 		return err
 	}
@@ -49,7 +50,7 @@ func (us *UserService) Login(username, password string) (domain.User, error) {
 	if err != nil {
 		return domain.User{}, err
 	}
-	passwordHash, err := cryptography.HashPassword(password, us.Argon2IDParameters)
+	passwordHash, err := cryptography.HashPassword(password, us.Config.Argon2IDParameter)
 	if correctPasswordHash != passwordHash {
 		return domain.User{}, ErrorInvalidCredentials
 	}

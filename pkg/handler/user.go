@@ -2,8 +2,10 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/zhews/memed-simple/pkg/config"
 	"github.com/zhews/memed-simple/pkg/cryptography"
 	"github.com/zhews/memed-simple/pkg/handler/dto"
 	"github.com/zhews/memed-simple/pkg/repository"
@@ -12,6 +14,7 @@ import (
 )
 
 type UserHandler struct {
+	Config  config.UserConfig
 	Service service.UserService
 }
 
@@ -43,18 +46,18 @@ func (uh *UserHandler) HandleLogin(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	claims := jwt.MapClaims{
-		"iss":   "api.memed.io/user",
+		"iss":   fmt.Sprintf("%s/user", uh.Config.BaseURI),
 		"sub":   user.Id.String(),
 		"exp":   time.Now().Add(time.Second * 10).Unix(),
 		"iat":   time.Now().Unix(),
 		"admin": user.Admin,
 	}
-	accessToken, err := cryptography.CreateJWT([]byte{}, claims)
+	accessToken, err := cryptography.CreateJWT([]byte(uh.Config.AccessSecretKey), claims)
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
-	refreshToken, err := cryptography.CreateJWT([]byte{}, claims)
+	refreshToken, err := cryptography.CreateJWT([]byte(uh.Config.RefreshSecretKey), claims)
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -88,18 +91,18 @@ func (uh *UserHandler) HandleCheckUsername(ctx *fiber.Ctx) error {
 
 func (uh *UserHandler) HandleRefresh(ctx *fiber.Ctx) error {
 	refreshToken := ctx.Cookies("refreshToken")
-	claims, err := cryptography.ValidateJWT([]byte{}, refreshToken)
+	claims, err := cryptography.ValidateJWT([]byte(uh.Config.RefreshSecretKey), refreshToken)
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	renewedClaims := jwt.MapClaims{
-		"iss":   "api.memed.io/user",
+		"iss":   fmt.Sprintf("%s/user", uh.Config.BaseURI),
 		"sub":   claims["sub"],
 		"exp":   time.Now().Add(time.Second * 10).Unix(),
 		"iat":   time.Now().Unix(),
 		"admin": claims["admin"],
 	}
-	accessToken, err := cryptography.CreateJWT([]byte{}, renewedClaims)
+	accessToken, err := cryptography.CreateJWT([]byte(uh.Config.AccessSecretKey), renewedClaims)
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
