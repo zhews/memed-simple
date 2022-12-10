@@ -3,7 +3,6 @@ package service
 import (
 	"database/sql"
 	"errors"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/zhews/memed-simple/pkg/cryptography"
 	"github.com/zhews/memed-simple/pkg/domain"
@@ -40,36 +39,20 @@ func (us *UserService) Register(username, name, password string) error {
 	return err
 }
 
-func (us *UserService) Login(username, password string) (string, string, error) {
+func (us *UserService) Login(username, password string) error {
 	user, err := us.Repository.GetByUsername(username)
 	if err != nil {
-		return "", "", err
+		return err
 	}
 	correctPasswordHash, err := cryptography.Decrypt([]byte{}, user.PasswordHash)
 	if err != nil {
-		return "", "", err
+		return err
 	}
 	passwordHash, err := cryptography.HashPassword(password, us.Argon2IDParameters)
 	if correctPasswordHash != passwordHash {
-		return "", "", ErrorInvalidCredentials
+		return ErrorInvalidCredentials
 	}
-	claims := jwt.MapClaims{
-		"iss":   "api.memed.io/user",
-		"sub":   user.Id.String(),
-		"exp":   time.Now().Add(time.Second * 10).Unix(),
-		"iat":   time.Now().Unix(),
-		"admin": user.Admin,
-	}
-	accessToken, err := cryptography.CreateJWT([]byte{}, claims)
-	if err != nil {
-		return "", "", err
-	}
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
-	refreshToken, err := cryptography.CreateJWT([]byte{}, claims)
-	if err != nil {
-		return "", "", err
-	}
-	return accessToken, refreshToken, nil
+	return nil
 }
 
 func (us *UserService) CheckUsername(username string) (bool, error) {
