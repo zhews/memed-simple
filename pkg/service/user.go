@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
@@ -17,7 +18,6 @@ type UserService struct {
 var ErrorInvalidCredentials = errors.New("invalid credentials")
 
 func (us *UserService) Register(username, name, password string) error {
-	now := time.Now().Unix()
 	passwordHash, err := cryptography.HashPassword(password, us.Argon2IDParameters)
 	if err != nil {
 		return err
@@ -26,6 +26,7 @@ func (us *UserService) Register(username, name, password string) error {
 	if err != nil {
 		return err
 	}
+	now := time.Now().Unix()
 	user := domain.User{
 		Id:           uuid.New(),
 		Username:     username,
@@ -69,4 +70,12 @@ func (us *UserService) Login(username, password string) (string, string, error) 
 		return "", "", err
 	}
 	return accessToken, refreshToken, nil
+}
+
+func (us *UserService) CheckUsername(username string) (bool, error) {
+	_, err := us.Repository.GetByUsername(username)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return true, nil
+	}
+	return false, err
 }
