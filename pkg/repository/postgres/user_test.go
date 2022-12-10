@@ -3,6 +3,8 @@ package postgres
 import (
 	"database/sql"
 	"github.com/google/uuid"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pashagolub/pgxmock/v2"
 	"github.com/zhews/memed-simple/pkg/domain"
 	"reflect"
@@ -58,7 +60,7 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Get the user that is in the database",
+			name: "Get user that is in the database",
 			fields: fields{
 				DB: mock,
 			},
@@ -95,6 +97,9 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 			}
 		})
 	}
+	if err = mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Mock expectations were not met: %s", err)
+	}
 }
 
 const queryBaseInsertUser = "INSERT INTO memed_user"
@@ -114,9 +119,21 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
+	duplicateUser := domain.User{
+		Id:           uuid.New(),
+		Username:     "zhews",
+		Name:         "First Last",
+		Admin:        true,
+		PasswordHash: []byte{},
+		CreatedAt:    now,
+		UpdatedAt:    now,
+	}
 	mock.ExpectExec(queryBaseInsertUser).
 		WithArgs(user.Id, user.Username, user.Name, user.Admin, user.PasswordHash, user.CreatedAt, user.UpdatedAt).
 		WillReturnResult(pgxmock.NewResult("INSERT", 1))
+	mock.ExpectExec(queryBaseInsertUser).
+		WithArgs(duplicateUser.Id, duplicateUser.Username, duplicateUser.Name, duplicateUser.Admin, duplicateUser.PasswordHash, duplicateUser.CreatedAt, duplicateUser.UpdatedAt).
+		WillReturnError(&pgconn.PgError{Code: pgerrcode.UniqueViolation})
 	type fields struct {
 		Conn Conn
 	}
@@ -139,6 +156,16 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "Insert user with invalid username",
+			fields: fields{
+				Conn: mock,
+			},
+			args: args{
+				user: duplicateUser,
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -149,5 +176,8 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 				t.Errorf("Insert() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
+	}
+	if err = mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Mock expectations were not met: %s", err)
 	}
 }

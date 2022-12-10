@@ -2,7 +2,11 @@ package postgres
 
 import (
 	"context"
+	"errors"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/zhews/memed-simple/pkg/domain"
+	"github.com/zhews/memed-simple/pkg/repository"
 )
 
 type UserRepositoryPostgres struct {
@@ -22,5 +26,14 @@ const queryInsertUser = "INSERT INTO memed_user (id, username, name, admin, pass
 
 func (urp *UserRepositoryPostgres) Insert(user domain.User) error {
 	_, err := urp.Conn.Exec(context.Background(), queryInsertUser, user.Id, user.Username, user.Name, user.Admin, user.PasswordHash, user.CreatedAt, user.UpdatedAt)
-	return err
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+				return repository.ErrorUsernameAlreadyTaken
+			}
+		}
+		return err
+	}
+	return nil
 }
