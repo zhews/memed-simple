@@ -2,8 +2,8 @@ package postgres
 
 import (
 	"database/sql"
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
+	"github.com/pashagolub/pgxmock/v2"
 	"github.com/zhews/memed-simple/pkg/domain"
 	"reflect"
 	"testing"
@@ -13,7 +13,7 @@ import (
 const queryBaseGetUserByUsername = "SELECT id, username, name, admin, password_hash, created_at, updated_at FROM memed_user"
 
 func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
-	db, mock, err := sqlmock.New()
+	mock, err := pgxmock.NewPool()
 	if err != nil {
 		t.FailNow()
 	}
@@ -31,7 +31,7 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 	mock.ExpectQuery(queryBaseGetUserByUsername).
 		WithArgs(user.Username).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "username", "name", "admin", "password_hash", "created_at", "updated_at"}).AddRow(
+			pgxmock.NewRows([]string{"id", "username", "name", "admin", "password_hash", "created_at", "updated_at"}).AddRow(
 				user.Id,
 				user.Username,
 				user.Name,
@@ -45,7 +45,7 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 		WithArgs(nonExistingUser).
 		WillReturnError(sql.ErrNoRows)
 	type fields struct {
-		DB *sql.DB
+		DB Conn
 	}
 	type args struct {
 		username string
@@ -60,7 +60,7 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 		{
 			name: "Get the user that is in the database",
 			fields: fields{
-				DB: db,
+				DB: mock,
 			},
 			args: args{
 				username: user.Username,
@@ -71,7 +71,7 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 		{
 			name: "Get user that is not in the database",
 			fields: fields{
-				DB: db,
+				DB: mock,
 			},
 			args: args{
 				username: nonExistingUser,
@@ -83,7 +83,7 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			urp := &UserRepositoryPostgres{
-				DB: tt.fields.DB,
+				Conn: tt.fields.DB,
 			}
 			got, err := urp.GetByUsername(tt.args.username)
 			if (err != nil) != tt.wantErr {
@@ -100,7 +100,7 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 const queryBaseInsertUser = "INSERT INTO memed_user"
 
 func TestUserRepositoryPostgres_Insert(t *testing.T) {
-	db, mock, err := sqlmock.New()
+	mock, err := pgxmock.NewPool()
 	if err != nil {
 		t.FailNow()
 	}
@@ -116,9 +116,9 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 	}
 	mock.ExpectExec(queryBaseInsertUser).
 		WithArgs(user.Id, user.Username, user.Name, user.Admin, user.PasswordHash, user.CreatedAt, user.UpdatedAt).
-		WillReturnResult(sqlmock.NewResult(0, 0))
+		WillReturnResult(pgxmock.NewResult("INSERT", 1))
 	type fields struct {
-		DB *sql.DB
+		Conn Conn
 	}
 	type args struct {
 		user domain.User
@@ -132,7 +132,7 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 		{
 			name: "Insert user",
 			fields: fields{
-				DB: db,
+				Conn: mock,
 			},
 			args: args{
 				user: user,
@@ -143,7 +143,7 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			urp := &UserRepositoryPostgres{
-				DB: tt.fields.DB,
+				Conn: tt.fields.Conn,
 			}
 			if err := urp.Insert(tt.args.user); (err != nil) != tt.wantErr {
 				t.Errorf("Insert() error = %v, wantErr %v", err, tt.wantErr)
