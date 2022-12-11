@@ -10,3 +10,12 @@ CREATE TABLE memed_user
     created_at    INT,
     updated_at    INT
 );
+CREATE TABLE memed_meme
+(
+    id         UUID PRIMARY KEY,
+    title      TEXT,
+    image      TEXT,
+    created_by UUID,
+    created_at INT,
+    updated_at INT
+);
