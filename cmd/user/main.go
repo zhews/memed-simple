@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/jackc/pgx/v5/pgxpool"
 	userConfig "github.com/zhews/memed-simple/pkg/config/user"
 	"github.com/zhews/memed-simple/pkg/handler"
@@ -36,8 +37,14 @@ func main() {
 	auth := app.Group("/auth")
 	auth.Post("/register", userHandler.HandleRegister)
 	auth.Post("/login", userHandler.HandleLogin)
-	auth.Post("/checkUsername", userHandler.HandleCheckUsername)
-	auth.Get("/logout", userHandler.HandleLogout)
+	auth.Get("/check/username/:username", userHandler.HandleCheckUsername)
+	auth.Use(jwtware.New(jwtware.Config{
+		SigningMethod: "HS512",
+		SigningKey:    []byte(config.RefreshSecretKey),
+		TokenLookup:   "cookie:refreshToken",
+	}))
+	auth.Post("/refresh", userHandler.HandleRefresh)
+	auth.Post("/logout", userHandler.HandleLogout)
 	app.Get("/health", handler.HandleHealth)
 	log.Fatalf("Error while running the HTTP server: %s\n", app.Listen(fmt.Sprintf(":%d", config.Port)))
 }
