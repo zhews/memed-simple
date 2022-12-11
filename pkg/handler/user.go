@@ -18,7 +18,7 @@ type UserHandler struct {
 	Service service.UserService
 }
 
-func (uh *UserHandler) HandleRegister(ctx fiber.Ctx) error {
+func (uh *UserHandler) HandleRegister(ctx *fiber.Ctx) error {
 	var request dto.RegisterRequest
 	if err := ctx.BodyParser(&request); err != nil {
 		return ctx.SendStatus(fiber.StatusBadRequest)
@@ -112,7 +112,7 @@ func (uh *UserHandler) HandleRefresh(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(response)
 }
 
-func (uh *UserHandler) Logout(ctx *fiber.Ctx) error {
+func (uh *UserHandler) HandleLogout(ctx *fiber.Ctx) error {
 	ctx.ClearCookie("refreshToken")
 	return ctx.SendStatus(fiber.StatusNoContent)
 }

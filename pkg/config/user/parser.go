@@ -7,6 +7,8 @@ import (
 )
 
 const (
+	VariablePort                        = "MEMED_PORT"
+	VariableDatabaseURL                 = "MEMED_DATABASE_URL"
 	VariableBaseURI                     = "MEMED_BASE_URI"
 	VariableAccessSecretKey             = "MEMED_ACCESS_SECRET_KEY"
 	VariableRefreshSecretKey            = "MEMED_REFRESH_SECRET_KEY"
@@ -19,6 +21,12 @@ const (
 )
 
 func FromEnvironmentalVariables() (Config, error) {
+	portString := os.Getenv(VariablePort)
+	port, err := strconv.Atoi(portString)
+	if err != nil {
+		return Config{}, err
+	}
+	databaseURL := os.Getenv(VariableDatabaseURL)
 	baseURI := os.Getenv(VariableBaseURI)
 	accessSecretKey := os.Getenv(VariableAccessSecretKey)
 	refreshSecretKey := os.Getenv(VariableRefreshSecretKey)
@@ -56,6 +64,8 @@ func FromEnvironmentalVariables() (Config, error) {
 		KeyLength:  uint32(argon2IDParameterKeyLength),
 	}
 	config := Config{
+		Port:              port,
+		DatabaseURL:       databaseURL,
 		BaseURI:           baseURI,
 		AccessSecretKey:   accessSecretKey,
 		RefreshSecretKey:  refreshSecretKey,
