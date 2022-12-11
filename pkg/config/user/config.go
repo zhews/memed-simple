@@ -4,6 +4,7 @@ import "github.com/zhews/memed-simple/pkg/cryptography"
 
 type Config struct {
 	Port              int                            `json:"port,omitempty"`
+	CorsAllowOrigins  string                         `json:"corsAllowOrigins,omitempty"`
 	DatabaseURL       string                         `json:"databaseURL,omitempty"`
 	BaseURI           string                         `json:"baseURI,omitempty"`
 	AccessSecretKey   string                         `json:"accessSecretKey,omitempty"`

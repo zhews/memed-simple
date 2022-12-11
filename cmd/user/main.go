@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/jackc/pgx/v5/pgxpool"
 	userConfig "github.com/zhews/memed-simple/pkg/config/user"
@@ -34,6 +35,9 @@ func main() {
 		Service: userService,
 	}
 	app := fiber.New()
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: config.CorsAllowOrigins,
+	}))
 	auth := app.Group("/auth")
 	auth.Post("/register", userHandler.HandleRegister)
 	auth.Post("/login", userHandler.HandleLogin)

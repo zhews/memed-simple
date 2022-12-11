@@ -8,6 +8,7 @@ import (
 
 const (
 	VariablePort                        = "MEMED_PORT"
+	VariableCorsAllowOrigins            = "MEMED_CORS_ALLOW_ORIGINS"
 	VariableDatabaseURL                 = "MEMED_DATABASE_URL"
 	VariableBaseURI                     = "MEMED_BASE_URI"
 	VariableAccessSecretKey             = "MEMED_ACCESS_SECRET_KEY"
@@ -26,6 +27,7 @@ func FromEnvironmentalVariables() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	corsAllowOrigins := os.Getenv(VariableCorsAllowOrigins)
 	databaseURL := os.Getenv(VariableDatabaseURL)
 	baseURI := os.Getenv(VariableBaseURI)
 	accessSecretKey := os.Getenv(VariableAccessSecretKey)
@@ -65,6 +67,7 @@ func FromEnvironmentalVariables() (Config, error) {
 	}
 	config := Config{
 		Port:              port,
+		CorsAllowOrigins:  corsAllowOrigins,
 		DatabaseURL:       databaseURL,
 		BaseURI:           baseURI,
 		AccessSecretKey:   accessSecretKey,
