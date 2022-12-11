@@ -1,9 +1,9 @@
 package postgres
 
 import (
-	"database/sql"
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pashagolub/pgxmock/v2"
 	"github.com/zhews/memed-simple/pkg/domain"
@@ -12,7 +12,95 @@ import (
 	"time"
 )
 
-const queryBaseGetUserByUsername = "SELECT id, username, name, admin, password_hash, created_at, updated_at FROM memed_user"
+const queryBaseGetUserBy = "SELECT id, username, name, admin, password_hash, created_at, updated_at FROM memed_user"
+
+func TestUserRepositoryPostgres_GetById(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.FailNow()
+	}
+	now := time.Now().Unix()
+	user := domain.User{
+		Id:           uuid.New(),
+		Username:     "zhews",
+		Name:         "First Last",
+		Admin:        false,
+		PasswordHash: []byte{},
+		CreatedAt:    now,
+		UpdatedAt:    now,
+	}
+	nonExistingUserId := uuid.New()
+	mock.ExpectQuery(queryBaseGetUserBy).
+		WithArgs(user.Id).
+		WillReturnRows(
+			pgxmock.NewRows([]string{"id", "id", "name", "admin", "password_hash", "created_at", "updated_at"}).AddRow(
+				user.Id,
+				user.Username,
+				user.Name,
+				user.Admin,
+				user.PasswordHash,
+				user.CreatedAt,
+				user.UpdatedAt,
+			),
+		)
+	mock.ExpectQuery(queryBaseGetUserBy).
+		WithArgs(nonExistingUserId).
+		WillReturnError(pgx.ErrNoRows)
+	type fields struct {
+		DB Conn
+	}
+	type args struct {
+		id uuid.UUID
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    domain.User
+		wantErr bool
+	}{
+		{
+			name: "Get user that is in the database",
+			fields: fields{
+				DB: mock,
+			},
+			args: args{
+				id: user.Id,
+			},
+			want:    user,
+			wantErr: false,
+		},
+		{
+			name: "Get user that is not in the database",
+			fields: fields{
+				DB: mock,
+			},
+			args: args{
+				id: nonExistingUserId,
+			},
+			want:    domain.User{},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			urp := &UserRepositoryPostgres{
+				Conn: tt.fields.DB,
+			}
+			got, err := urp.GetById(tt.args.id)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetById() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetById() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+	if err = mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Mock expectations were not met: %s", err)
+	}
+}
 
 func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 	mock, err := pgxmock.NewPool()
@@ -30,10 +118,10 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 		UpdatedAt:    now,
 	}
 	nonExistingUser := "nonExisting"
-	mock.ExpectQuery(queryBaseGetUserByUsername).
+	mock.ExpectQuery(queryBaseGetUserBy).
 		WithArgs(user.Username).
 		WillReturnRows(
-			pgxmock.NewRows([]string{"id", "username", "name", "admin", "password_hash", "created_at", "updated_at"}).AddRow(
+			pgxmock.NewRows([]string{"id", "id", "name", "admin", "password_hash", "created_at", "updated_at"}).AddRow(
 				user.Id,
 				user.Username,
 				user.Name,
@@ -43,9 +131,9 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 				user.UpdatedAt,
 			),
 		)
-	mock.ExpectQuery(queryBaseGetUserByUsername).
+	mock.ExpectQuery(queryBaseGetUserBy).
 		WithArgs(nonExistingUser).
-		WillReturnError(sql.ErrNoRows)
+		WillReturnError(pgx.ErrNoRows)
 	type fields struct {
 		DB Conn
 	}
@@ -157,7 +245,7 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Insert user with invalid username",
+			name: "Insert user with invalid id",
 			fields: fields{
 				Conn: mock,
 			},

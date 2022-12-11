@@ -13,6 +13,7 @@ type User struct {
 }
 
 type UserRepository interface {
+	GetById(id uuid.UUID) (User, error)
 	GetByUsername(username string) (User, error)
 	Insert(user User) error
 }

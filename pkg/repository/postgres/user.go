@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -12,6 +13,18 @@ import (
 
 type UserRepositoryPostgres struct {
 	Conn Conn
+}
+
+const queryGetUserById = "SELECT id, username, name, admin, password_hash, created_at, updated_at FROM memed_user WHERE id = $1"
+
+func (urp *UserRepositoryPostgres) GetById(id uuid.UUID) (domain.User, error) {
+	row := urp.Conn.QueryRow(context.Background(), queryGetUserById, id)
+	var user domain.User
+	err := row.Scan(&user.Id, &user.Username, &user.Name, &user.Admin, &user.PasswordHash, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil && errors.Is(err, pgx.ErrNoRows) {
+		return user, repository.ErrorNoRows
+	}
+	return user, err
 }
 
 const queryGetUserByUsername = "SELECT id, username, name, admin, password_hash, created_at, updated_at FROM memed_user WHERE username = $1"
