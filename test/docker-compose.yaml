@@ -8,3 +8,25 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  user:
+    image: memed-user:latest
+    build:
+      context: ..
+      dockerfile: ./build/package/user/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - MEMED_ACCESS_SECRET_KEY=ACCESS_SECRET_KEY
+      - MEMED_ARGON2ID_PARAMETER_ITERATIONS=2
+      - MEMED_ARGON2ID_PARAMETER_KEY_LENGTH=32
+      - MEMED_ARGON2ID_PARAMETER_MEMORY=32768
+      - MEMED_ARGON2ID_PARAMETER_SALT_SIZE=16
+      - MEMED_ARGON2ID_PARAMETER_THREADS=2
+      - MEMED_BASE_URI=api.memed.io
+      - MEMED_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/memed
+      - MEMED_ENCRYPTION_KEY=f82f8755d9942a429ca1b77b978d0fe6
+      - MEMED_PORT=8080
+      - MEMED_REFRESH_SECRET_KEY=REFRESH_SECRET_KEY
+    depends_on:
+      database:
+        condition: service_started
