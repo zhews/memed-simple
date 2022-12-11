@@ -1,0 +1,13 @@
+api
+assets
+bin
+build
+deploy
+docs
+githooks
+scripts
+test
+tools
+web
+.gitignore
+Makefile
