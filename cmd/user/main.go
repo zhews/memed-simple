@@ -38,5 +38,6 @@ func main() {
 	auth.Post("/login", userHandler.HandleLogin)
 	auth.Post("/checkUsername", userHandler.HandleCheckUsername)
 	auth.Get("/logout", userHandler.HandleLogout)
+	app.Get("/health", handler.HandleHealth)
 	log.Fatalf("Error while running the HTTP server: %s\n", app.Listen(fmt.Sprintf(":%d", config.Port)))
 }
