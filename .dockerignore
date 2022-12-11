@@ -1,3 +1,6 @@
+.git
+.idea
+.vscode
 api
 assets
 bin
