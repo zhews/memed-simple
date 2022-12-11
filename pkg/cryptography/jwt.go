@@ -10,7 +10,7 @@ var (
 )
 
 func CreateJWT(key []byte, claims jwt.MapClaims) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodEdDSA, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 	signedToken, err := token.SignedString(key)
 	return signedToken, err
 }
