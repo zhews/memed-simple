@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 	"github.com/google/uuid"
-	"github.com/zhews/memed-simple/pkg/config"
+	userConfig "github.com/zhews/memed-simple/pkg/config/user"
 	"github.com/zhews/memed-simple/pkg/cryptography"
 	"github.com/zhews/memed-simple/pkg/domain"
 	"github.com/zhews/memed-simple/pkg/repository"
@@ -11,7 +11,7 @@ import (
 )
 
 type UserService struct {
-	Config     config.UserConfig
+	Config     userConfig.Config
 	Repository domain.UserRepository
 }
 

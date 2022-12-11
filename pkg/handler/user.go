@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/zhews/memed-simple/pkg/config"
+	userConfig "github.com/zhews/memed-simple/pkg/config/user"
 	"github.com/zhews/memed-simple/pkg/cryptography"
 	"github.com/zhews/memed-simple/pkg/handler/dto"
 	"github.com/zhews/memed-simple/pkg/repository"
@@ -14,7 +14,7 @@ import (
 )
 
 type UserHandler struct {
-	Config  config.UserConfig
+	Config  userConfig.Config
 	Service service.UserService
 }
 

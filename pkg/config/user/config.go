@@ -1,8 +1,8 @@
-package config
+package user
 
 import "github.com/zhews/memed-simple/pkg/cryptography"
 
-type UserConfig struct {
+type Config struct {
 	BaseURI           string                         `json:"baseURI,omitempty"`
 	AccessSecretKey   string                         `json:"accessSecretKey,omitempty"`
 	RefreshSecretKey  string                         `json:"refreshSecretKey,omitempty"`
