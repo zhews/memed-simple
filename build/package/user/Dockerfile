@@ -7,5 +7,5 @@ WORKDIR /run
 COPY --from=build /build/user user
 RUN addgroup -S memed && adduser -S memed -G memed
 USER memed
-HEALTHCHECK CMD wget --no-verbose --tries=1 --spider "http://localhost:$MEMED_PORT/health" || exit 1
+HEALTHCHECK --interval=5s CMD wget --no-verbose --tries=1 --spider "http://localhost:$MEMED_PORT/health" || exit 1
 CMD ["/run/user"]
