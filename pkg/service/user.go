@@ -46,12 +46,12 @@ func (us *UserService) Login(username, password string) (domain.User, error) {
 		}
 		return domain.User{}, err
 	}
-	correctPasswordHash, err := cryptography.Decrypt([]byte{}, user.PasswordHash)
+	correctPasswordHash, err := cryptography.Decrypt([]byte(us.Config.EncryptionKey), user.PasswordHash)
 	if err != nil {
 		return domain.User{}, err
 	}
-	passwordHash, err := cryptography.HashPassword(password, us.Config.Argon2IDParameter)
-	if correctPasswordHash != passwordHash {
+	err = cryptography.CompareHashAndPassword(correctPasswordHash, password)
+	if err != nil {
 		return domain.User{}, ErrorInvalidCredentials
 	}
 	return user, nil
