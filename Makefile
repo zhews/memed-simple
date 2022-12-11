@@ -1,3 +1,5 @@
+.DEFAULT_GOAL := build
+
 build:
 	./scripts/build_all.sh
 
