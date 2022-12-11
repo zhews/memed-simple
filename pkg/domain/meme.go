@@ -13,7 +13,7 @@ type Meme struct {
 
 type MemeRepository interface {
 	GetAll() ([]Meme, error)
-	GetById(id uuid.UUID) (User, error)
+	GetById(id uuid.UUID) (Meme, error)
 	Insert(meme Meme) error
 	Update(meme Meme) error
 	Delete(id uuid.UUID) error
