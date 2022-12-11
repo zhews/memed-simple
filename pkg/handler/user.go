@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	userConfig "github.com/zhews/memed-simple/pkg/config/user"
 	"github.com/zhews/memed-simple/pkg/cryptography"
 	"github.com/zhews/memed-simple/pkg/handler/dto"
@@ -16,6 +17,26 @@ import (
 type UserHandler struct {
 	Config  userConfig.Config
 	Service service.UserService
+}
+
+func (uh *UserHandler) HandleGetById(ctx *fiber.Ctx) error {
+	idParam := ctx.Params("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		return ctx.SendStatus(fiber.StatusBadRequest)
+	}
+	user, err := uh.Service.GetById(id)
+	if err != nil {
+		return ctx.SendStatus(fiber.StatusInternalServerError)
+	}
+	response := dto.User{
+		Id:        user.Id,
+		Username:  user.Username,
+		Name:      user.Name,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+	return ctx.Status(fiber.StatusOK).JSON(response)
 }
 
 func (uh *UserHandler) HandleRegister(ctx *fiber.Ctx) error {

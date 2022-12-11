@@ -15,6 +15,11 @@ type UserService struct {
 	Repository domain.UserRepository
 }
 
+func (us *UserService) GetById(id uuid.UUID) (domain.User, error) {
+	user, err := us.Repository.GetById(id)
+	return user, err
+}
+
 func (us *UserService) Register(username, name, password string) error {
 	passwordHash, err := cryptography.HashPassword(password, us.Config.Argon2IDParameter)
 	if err != nil {

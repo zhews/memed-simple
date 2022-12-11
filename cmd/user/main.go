@@ -38,6 +38,8 @@ func main() {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: config.CorsAllowOrigins,
 	}))
+	user := app.Group("/user")
+	user.Get("/:id", userHandler.HandleGetById)
 	auth := app.Group("/auth")
 	auth.Post("/register", userHandler.HandleRegister)
 	auth.Post("/login", userHandler.HandleLogin)
