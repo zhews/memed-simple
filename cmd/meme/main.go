@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/jackc/pgx/v5/pgxpool"
 	memeConfig "github.com/zhews/memed-simple/pkg/config/meme"
@@ -35,15 +36,18 @@ func main() {
 		Service: memeService,
 	}
 	app := fiber.New()
-	meme := app.Group("/meme", jwtware.New(jwtware.Config{
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: config.CorsAllowOrigins,
+	}))
+	app.Use(jwtware.New(jwtware.Config{
 		SigningMethod: "HS512",
 		SigningKey:    []byte(config.AccessSecretKey),
 	}))
-	meme.Get("/", memeHandler.HandleGetMemes)
-	meme.Get("/:id", memeHandler.HandleGetMeme)
-	meme.Post("/", memeHandler.HandleUploadMeme)
-	meme.Put("/:id", memeHandler.HandleUpdateMeme)
-	meme.Delete("/:id", middleware.AdminOnly, memeHandler.HandleDeleteMeme)
+	app.Get("/", memeHandler.HandleGetMemes)
+	app.Get("/:id", memeHandler.HandleGetMeme)
+	app.Post("/", memeHandler.HandleUploadMeme)
+	app.Put("/:id", memeHandler.HandleUpdateMeme)
+	app.Delete("/:id", middleware.AdminOnly, memeHandler.HandleDeleteMeme)
 	app.Static("/image", config.MemeDirectory)
 	app.Get("/health", handler.HandleHealth)
 	log.Fatalf("Error while running the HTTP server: %s\n", app.Listen(fmt.Sprintf(":%d", config.Port)))

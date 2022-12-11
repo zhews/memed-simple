@@ -8,6 +8,7 @@ import (
 const (
 	VariablePort             = "MEMED_PORT"
 	VariableDatabaseURL      = "MEMED_DATABASE_URL"
+	VariableCorsAllowOrigins = "MEMED_ALLOW_ORIGINS"
 	VariableMemeDirectory    = "MEMED_MEME_DIRECTORY"
 	VariableUserMicroservice = "MEMED_USER_MICROSERVICE"
 	VariableUserEndpoint     = "MEMED_USER_ENDPOINT"
@@ -20,6 +21,7 @@ func ParseFromEnvironmentalVariables() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	allowOrigins := os.Getenv(VariableCorsAllowOrigins)
 	databaseURL := os.Getenv(VariableDatabaseURL)
 	memeDirectory := os.Getenv(VariableMemeDirectory)
 	if _, err = os.Stat(memeDirectory); os.IsNotExist(err) {
@@ -31,6 +33,7 @@ func ParseFromEnvironmentalVariables() (Config, error) {
 	config := Config{
 		Port:             port,
 		DatabaseURL:      databaseURL,
+		CorsAllowOrigins: allowOrigins,
 		MemeDirectory:    memeDirectory,
 		UserMicroservice: userMicroservice,
 		UserEndpoint:     userEndpoint,
