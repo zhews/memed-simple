@@ -1,7 +1,10 @@
+build:
+	./scripts/build_all.sh
+
 test:
 	go test ./...
 
 hooks:
 	cd .git/hooks; ln -s ../../githooks/* .
 
-.PHONY: test hooks
+.PHONY: build test hooks
