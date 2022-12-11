@@ -51,10 +51,10 @@ func (mrp *MemeRepositoryPostgres) Insert(meme domain.Meme) error {
 	return err
 }
 
-const queryUpdateMeme = "UPDATE memed_meme SET title = $1, updated_at = $2 WHERE id = $3"
+const queryUpdateMeme = "UPDATE memed_meme SET title = $1, updated_at = $2 WHERE id = $3 AND created_by = $4"
 
-func (mrp *MemeRepositoryPostgres) Update(meme domain.Meme) error {
-	_, err := mrp.Conn.Exec(context.Background(), queryUpdateMeme, meme.Title, meme.UpdatedAt, meme.Id)
+func (mrp *MemeRepositoryPostgres) Update(meme domain.Meme, userId uuid.UUID) error {
+	_, err := mrp.Conn.Exec(context.Background(), queryUpdateMeme, meme.Title, meme.UpdatedAt, meme.Id, userId)
 	return err
 }
 
