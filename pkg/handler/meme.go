@@ -23,7 +23,7 @@ func (mh *MemeHandler) HandleGetMemes(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
-	var dtoMemes []dto.MemeResponse
+	dtoMemes := make([]dto.MemeResponse, 0)
 	for _, meme := range memes {
 		response, err := http.Get(fmt.Sprintf("%s%s/%s", mh.Config.UserMicroservice, mh.Config.UserEndpoint, meme.CreatedBy))
 		if err != nil {

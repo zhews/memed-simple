@@ -39,7 +39,8 @@ func (ms *MemeService) UploadMeme(title, contentType string, file io.Reader, use
 	if !ok {
 		return ErrorInvalidContentType
 	}
-	imageFile := fmt.Sprintf("%s/%s.%s", ms.Config.MemeDirectory, uuid.New().String(), extension)
+	imageFileName := fmt.Sprintf("%s.%s", uuid.New().String(), extension)
+	imageFile := fmt.Sprintf("%s/%s", ms.Config.MemeDirectory, imageFileName)
 	err := writeMemeToDisk(imageFile, file)
 	if err != nil {
 		return err
@@ -48,7 +49,7 @@ func (ms *MemeService) UploadMeme(title, contentType string, file io.Reader, use
 	meme := domain.Meme{
 		Id:        uuid.New(),
 		Title:     title,
-		Image:     imageFile,
+		Image:     imageFileName,
 		CreatedBy: userId,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -58,7 +59,7 @@ func (ms *MemeService) UploadMeme(title, contentType string, file io.Reader, use
 }
 
 func writeMemeToDisk(fileName string, meme io.Reader) error {
-	file, err := os.Open(fileName)
+	file, err := os.Create(fileName)
 	if err != nil {
 		return err
 	}
