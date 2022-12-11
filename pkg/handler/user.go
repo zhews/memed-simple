@@ -75,11 +75,8 @@ func (uh *UserHandler) HandleLogin(ctx *fiber.Ctx) error {
 }
 
 func (uh *UserHandler) HandleCheckUsername(ctx *fiber.Ctx) error {
-	var request dto.CheckUsernameRequest
-	if err := ctx.BodyParser(&request); err != nil {
-		return ctx.SendStatus(fiber.StatusBadRequest)
-	}
-	valid, err := uh.Service.CheckUsername(request.Username)
+	username := ctx.Params("username")
+	valid, err := uh.Service.CheckUsername(username)
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
