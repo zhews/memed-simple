@@ -22,6 +22,7 @@ services:
       - MEMED_ARGON2ID_PARAMETER_MEMORY=32768
       - MEMED_ARGON2ID_PARAMETER_SALT_SIZE=16
       - MEMED_ARGON2ID_PARAMETER_THREADS=2
+      - MEMED_CORS_ALLOW_ORIGIN=http://localhost:4200
       - MEMED_BASE_URI=api.memed.io
       - MEMED_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/memed
       - MEMED_ENCRYPTION_KEY=f82f8755d9942a429ca1b77b978d0fe6
