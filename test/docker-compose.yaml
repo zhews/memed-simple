@@ -31,3 +31,22 @@ services:
     depends_on:
       database:
         condition: service_started
+  meme:
+    image: memed-meme:latest
+    build:
+      context: ..
+      dockerfile: ./build/package/meme/Dockerfile
+    ports:
+      - "9090:9090"
+    environment:
+      - MEMED_ACCESS_SECRET_KEY=ACCESS_SECRET_KEY
+      - MEMED_DATABASE_URL=postgresql://postgres:postgres@database:5432/memed
+      - MEMED_MEME_DIRECTORY=/run/static
+      - MEMED_PORT=9090
+      - MEMED_USER_ENDPOINT=/user
+      - MEMED_USER_MICROSERVICE=http://user:8080
+    volumes:
+      - ./static:/run/static
+    depends_on:
+      user:
+        condition: service_healthy
