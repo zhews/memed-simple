@@ -22,7 +22,7 @@ func (ms *MemeService) GetMemes() ([]domain.Meme, error) {
 	return memes, err
 }
 
-func (ms *MemeService) GetMeme(id uuid.UUID) (domain.Meme, error) {
+func (ms *MemeService) GetMemeById(id uuid.UUID) (domain.Meme, error) {
 	meme, err := ms.Repository.GetById(id)
 	return meme, err
 }
