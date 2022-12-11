@@ -37,7 +37,7 @@ func (mh *MemeHandler) HandleGetMemes(ctx *fiber.Ctx) error {
 		dtoMeme := dto.MemeResponse{
 			Id:        meme.Id,
 			Title:     meme.Title,
-			Image:     meme.Image,
+			Image:     fmt.Sprintf("/image/%s", meme.Image),
 			Creator:   creator,
 			CreatedAt: meme.CreatedAt,
 			UpdatedAt: meme.UpdatedAt,
@@ -73,7 +73,7 @@ func (mh *MemeHandler) HandleGetMeme(ctx *fiber.Ctx) error {
 	dtoMeme := dto.MemeResponse{
 		Id:        meme.Id,
 		Title:     meme.Title,
-		Image:     meme.Image,
+		Image:     fmt.Sprintf("/image/%s", meme.Image),
 		Creator:   creator,
 		CreatedAt: meme.CreatedAt,
 		UpdatedAt: meme.UpdatedAt,

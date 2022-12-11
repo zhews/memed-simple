@@ -44,6 +44,7 @@ func main() {
 	meme.Post("/", memeHandler.HandleUploadMeme)
 	meme.Put("/:id", memeHandler.HandleUpdateMeme)
 	meme.Delete("/:id", middleware.AdminOnly, memeHandler.HandleDeleteMeme)
+	app.Static("/image", config.MemeDirectory)
 	app.Get("/health", handler.HandleHealth)
 	log.Fatalf("Error while running the HTTP server: %s\n", app.Listen(fmt.Sprintf(":%d", config.Port)))
 }

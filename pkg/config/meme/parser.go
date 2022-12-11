@@ -22,6 +22,9 @@ func ParseFromEnvironmentalVariables() (Config, error) {
 	}
 	databaseURL := os.Getenv(VariableDatabaseURL)
 	memeDirectory := os.Getenv(VariableMemeDirectory)
+	if _, err = os.Stat(memeDirectory); os.IsNotExist(err) {
+		return Config{}, err
+	}
 	userMicroservice := os.Getenv(VariableUserMicroservice)
 	userEndpoint := os.Getenv(VariableUserEndpoint)
 	accessSecretKey := os.Getenv(VariableAccessSecretKey)
