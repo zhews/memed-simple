@@ -29,7 +29,7 @@ func (uh *UserHandler) HandleGetById(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
-	response := dto.User{
+	response := dto.UserResponse{
 		Id:        user.Id,
 		Username:  user.Username,
 		Name:      user.Name,
