@@ -38,6 +38,7 @@ func main() {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: config.CorsAllowOrigins,
 	}))
+	app.Get("/health", handler.HandleHealth)
 	app.Get("/:id", userHandler.HandleGetById)
 	auth := app.Group("/auth")
 	auth.Post("/register", userHandler.HandleRegister)
@@ -50,6 +51,5 @@ func main() {
 	}))
 	auth.Post("/refresh", userHandler.HandleRefresh)
 	auth.Post("/logout", userHandler.HandleLogout)
-	app.Get("/health", handler.HandleHealth)
 	log.Fatalf("Error while running the HTTP server: %s\n", app.Listen(fmt.Sprintf(":%d", config.Port)))
 }
