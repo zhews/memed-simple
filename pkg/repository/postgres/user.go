@@ -14,7 +14,7 @@ type UserRepositoryPostgres struct {
 	Conn Conn
 }
 
-const queryGetUserByUsername = "SELECT id, username, name, admin, password_hash, created_at, updated_at FROM memed_user WHERE id = $1"
+const queryGetUserByUsername = "SELECT id, username, name, admin, password_hash, created_at, updated_at FROM memed_user WHERE username = $1"
 
 func (urp *UserRepositoryPostgres) GetByUsername(username string) (domain.User, error) {
 	row := urp.Conn.QueryRow(context.Background(), queryGetUserByUsername, username)
