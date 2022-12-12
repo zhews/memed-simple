@@ -38,6 +38,7 @@ services:
       dockerfile: ./build/package/meme/Dockerfile
     environment:
       - MEMED_ACCESS_SECRET_KEY=ACCESS_SECRET_KEY
+      - MEMED_CORS_ALLOW_ORIGINS=http://localhost:4200
       - MEMED_DATABASE_URL=postgresql://postgres:postgres@database:5432/memed
       - MEMED_MEME_DIRECTORY=/run/static
       - MEMED_PORT=7575
