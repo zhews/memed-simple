@@ -13,8 +13,6 @@ services:
     build:
       context: ..
       dockerfile: ./build/package/user/Dockerfile
-    ports:
-      - "8080:8080"
     environment:
       - MEMED_ACCESS_SECRET_KEY=ACCESS_SECRET_KEY
       - MEMED_ARGON2ID_PARAMETER_ITERATIONS=2
@@ -26,7 +24,7 @@ services:
       - MEMED_BASE_URI=api.memed.io
       - MEMED_DATABASE_URL=postgresql://postgres:postgres@database:5432/memed
       - MEMED_ENCRYPTION_KEY=f82f8755d9942a429ca1b77b978d0fe6
-      - MEMED_PORT=8080
+      - MEMED_PORT=7070
       - MEMED_REFRESH_SECRET_KEY=REFRESH_SECRET_KEY
     depends_on:
       database:
@@ -36,17 +34,26 @@ services:
     build:
       context: ..
       dockerfile: ./build/package/meme/Dockerfile
-    ports:
-      - "9090:9090"
     environment:
       - MEMED_ACCESS_SECRET_KEY=ACCESS_SECRET_KEY
       - MEMED_DATABASE_URL=postgresql://postgres:postgres@database:5432/memed
       - MEMED_MEME_DIRECTORY=/run/static
-      - MEMED_PORT=9090
+      - MEMED_PORT=7575
       - MEMED_USER_ENDPOINT=/user
       - MEMED_USER_MICROSERVICE=http://user:8080
     volumes:
       - ./static:/run/static
     depends_on:
       user:
+        condition: service_healthy
+  nginx:
+    image: nginx:1.23-alpine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      user:
+        condition: service_healthy
+      meme:
         condition: service_healthy
