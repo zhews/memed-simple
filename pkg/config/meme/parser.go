@@ -8,7 +8,7 @@ import (
 const (
 	VariablePort             = "MEMED_PORT"
 	VariableDatabaseURL      = "MEMED_DATABASE_URL"
-	VariableCorsAllowOrigins = "MEMED_ALLOW_ORIGINS"
+	VariableCorsAllowOrigins = "MEMED_CORS_ALLOW_ORIGINS"
 	VariableMemeDirectory    = "MEMED_MEME_DIRECTORY"
 	VariableUserMicroservice = "MEMED_USER_MICROSERVICE"
 	VariableUserEndpoint     = "MEMED_USER_ENDPOINT"
