@@ -11,6 +11,7 @@ import (
 	"github.com/zhews/memed-simple/pkg/handler/dto"
 	"github.com/zhews/memed-simple/pkg/repository"
 	"github.com/zhews/memed-simple/pkg/service"
+	"log"
 	"time"
 )
 
@@ -27,6 +28,7 @@ func (uh *UserHandler) HandleGetById(ctx *fiber.Ctx) error {
 	}
 	user, err := uh.Service.GetById(id)
 	if err != nil {
+		log.Println("Could not get user by id: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	response := dto.UserResponse{
@@ -49,6 +51,7 @@ func (uh *UserHandler) HandleRegister(ctx *fiber.Ctx) error {
 		if errors.Is(err, repository.ErrorUsernameAlreadyTaken) {
 			return ctx.SendStatus(fiber.StatusBadRequest)
 		}
+		log.Println("Could not register user: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	return ctx.SendStatus(fiber.StatusNoContent)
@@ -64,6 +67,7 @@ func (uh *UserHandler) HandleLogin(ctx *fiber.Ctx) error {
 		if errors.Is(err, service.ErrorUserNotFound) || errors.Is(err, service.ErrorInvalidCredentials) {
 			return ctx.SendStatus(fiber.StatusUnauthorized)
 		}
+		log.Println("Could not login user: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	claims := jwt.MapClaims{
@@ -75,11 +79,13 @@ func (uh *UserHandler) HandleLogin(ctx *fiber.Ctx) error {
 	}
 	accessToken, err := cryptography.CreateJWT([]byte(uh.Config.AccessSecretKey), claims)
 	if err != nil {
+		log.Println("Could not create access token: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	claims["exp"] = time.Now().Add(time.Hour * time.Duration(uh.Config.RefreshTokenValidHours)).Unix()
 	refreshToken, err := cryptography.CreateJWT([]byte(uh.Config.RefreshSecretKey), claims)
 	if err != nil {
+		log.Println("Could not create refresh token: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	response := dto.LoginResponse{
@@ -99,6 +105,7 @@ func (uh *UserHandler) HandleCheckUsername(ctx *fiber.Ctx) error {
 	username := ctx.Params("username")
 	valid, err := uh.Service.CheckUsername(username)
 	if err != nil {
+		log.Println("Could not check the username: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	response := dto.CheckUsernameResponse{
@@ -111,6 +118,7 @@ func (uh *UserHandler) HandleRefresh(ctx *fiber.Ctx) error {
 	refreshToken := ctx.Cookies("refreshToken")
 	claims, err := cryptography.ValidateJWT([]byte(uh.Config.RefreshSecretKey), refreshToken)
 	if err != nil {
+		log.Println("Could not validate the JWT: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	renewedClaims := jwt.MapClaims{
@@ -122,6 +130,7 @@ func (uh *UserHandler) HandleRefresh(ctx *fiber.Ctx) error {
 	}
 	accessToken, err := cryptography.CreateJWT([]byte(uh.Config.AccessSecretKey), renewedClaims)
 	if err != nil {
+		log.Println("Could not create JWT: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	response := dto.RefreshResponse{
