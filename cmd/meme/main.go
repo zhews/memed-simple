@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/jackc/pgx/v5/pgxpool"
 	memeConfig "github.com/zhews/memed-simple/pkg/config/meme"
@@ -40,6 +41,7 @@ func main() {
 		AllowOrigins: config.CorsAllowOrigins,
 	}))
 	app.Get("/health", handler.HandleHealth)
+	app.Use(logger.New())
 	app.Use(jwtware.New(jwtware.Config{
 		SigningMethod: "HS512",
 		SigningKey:    []byte(config.AccessSecretKey),
