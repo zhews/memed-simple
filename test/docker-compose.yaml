@@ -41,10 +41,8 @@ services:
       - MEMED_DATABASE_URL=postgresql://postgres:postgres@database:5432/memed
       - MEMED_MEME_DIRECTORY=/run/static
       - MEMED_PORT=7575
-      - MEMED_USER_ENDPOINT=/user
-      - MEMED_USER_MICROSERVICE=http://user:8080
-    volumes:
-      - ./static:/run/static
+      - MEMED_USER_ENDPOINT
+      - MEMED_USER_MICROSERVICE=http://user:7070
     depends_on:
       user:
         condition: service_healthy
