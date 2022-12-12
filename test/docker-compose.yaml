@@ -15,6 +15,7 @@ services:
       dockerfile: ./build/package/user/Dockerfile
     environment:
       - MEMED_ACCESS_SECRET_KEY=ACCESS_SECRET_KEY
+      - MEMED_ACCESS_TOKEN_VALID_SECONDS=3600
       - MEMED_ARGON2ID_PARAMETER_ITERATIONS=2
       - MEMED_ARGON2ID_PARAMETER_KEY_LENGTH=32
       - MEMED_ARGON2ID_PARAMETER_MEMORY=32768
@@ -26,6 +27,7 @@ services:
       - MEMED_ENCRYPTION_KEY=f82f8755d9942a429ca1b77b978d0fe6
       - MEMED_PORT=7070
       - MEMED_REFRESH_SECRET_KEY=REFRESH_SECRET_KEY
+      - MEMED_REFRESH_TOKEN_VALID_HOURS=24
     depends_on:
       database:
         condition: service_started
