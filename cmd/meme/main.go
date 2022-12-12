@@ -42,6 +42,7 @@ func main() {
 	}))
 	app.Get("/health", handler.HandleHealth)
 	app.Use(logger.New())
+	app.Static("/image", config.MemeDirectory)
 	app.Use(jwtware.New(jwtware.Config{
 		SigningMethod: "HS512",
 		SigningKey:    []byte(config.AccessSecretKey),
@@ -51,6 +52,5 @@ func main() {
 	app.Post("/", memeHandler.HandleUploadMeme)
 	app.Put("/:id", memeHandler.HandleUpdateMeme)
 	app.Delete("/:id", middleware.AdminOnly, memeHandler.HandleDeleteMeme)
-	app.Static("/image", config.MemeDirectory)
 	log.Fatalf("Error while running the HTTP server: %s\n", app.Listen(fmt.Sprintf(":%d", config.Port)))
 }
