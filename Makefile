@@ -9,6 +9,9 @@ docker:
 test:
 	go test ./...
 
+coverage:
+	go test -race -coverprofile=coverage.out -covermode=atomic -coverpkg=./... ./...
+
 test-env-up:
 	cd test; docker-compose up -d
 
@@ -18,4 +21,4 @@ test-env-down:
 hooks:
 	cd .git/hooks; ln -s ../../githooks/* .
 
-.PHONY: build docker test test-env-up test-env-down hooks
+.PHONY: build docker test coverage test-env-up test-env-down hooks
