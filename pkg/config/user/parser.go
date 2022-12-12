@@ -12,7 +12,7 @@ const (
 	VariableDatabaseURL                 = "MEMED_DATABASE_URL"
 	VariableBaseURI                     = "MEMED_BASE_URI"
 	VariableAccessSecretKey             = "MEMED_ACCESS_SECRET_KEY"
-	VariableAccessTokenValidSeconds     = "MEMED_ACCESS_TOKEN_VALID_MINUTES"
+	VariableAccessTokenValidSeconds     = "MEMED_ACCESS_TOKEN_VALID_SECONDS"
 	VariableRefreshSecretKey            = "MEMED_REFRESH_SECRET_KEY"
 	VariableRefreshTokenValidHours      = "MEMED_REFRESH_TOKEN_VALID_HOURS"
 	VariableEncryptionKey               = "MEMED_ENCRYPTION_KEY"
