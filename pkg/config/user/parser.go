@@ -12,7 +12,9 @@ const (
 	VariableDatabaseURL                 = "MEMED_DATABASE_URL"
 	VariableBaseURI                     = "MEMED_BASE_URI"
 	VariableAccessSecretKey             = "MEMED_ACCESS_SECRET_KEY"
+	VariableAccessTokenValidSeconds     = "MEMED_ACCESS_TOKEN_VALID_MINUTES"
 	VariableRefreshSecretKey            = "MEMED_REFRESH_SECRET_KEY"
+	VariableRefreshTokenValidHours      = "MEMED_REFRESH_TOKEN_VALID_HOURS"
 	VariableEncryptionKey               = "MEMED_ENCRYPTION_KEY"
 	VariableArgon2IDParameterSaltSize   = "MEMED_ARGON2ID_PARAMETER_SALT_SIZE"
 	VariableArgon2IDParameterIterations = "MEMED_ARGON2ID_PARAMETER_ITERATIONS"
@@ -31,7 +33,17 @@ func FromEnvironmentalVariables() (Config, error) {
 	databaseURL := os.Getenv(VariableDatabaseURL)
 	baseURI := os.Getenv(VariableBaseURI)
 	accessSecretKey := os.Getenv(VariableAccessSecretKey)
+	accessTokenValidSecondsString := os.Getenv(VariableAccessTokenValidSeconds)
+	accessTokenValidSeconds, err := strconv.Atoi(accessTokenValidSecondsString)
+	if err != nil {
+		return Config{}, err
+	}
 	refreshSecretKey := os.Getenv(VariableRefreshSecretKey)
+	refreshTokenValidHoursString := os.Getenv(VariableRefreshTokenValidHours)
+	refreshTokenValidHours, err := strconv.Atoi(refreshTokenValidHoursString)
+	if err != nil {
+		return Config{}, err
+	}
 	encryptionKey := os.Getenv(VariableEncryptionKey)
 	argon2IDParameterSaltSizeString := os.Getenv(VariableArgon2IDParameterSaltSize)
 	argon2IDParameterSaltSize, err := strconv.Atoi(argon2IDParameterSaltSizeString)
@@ -66,14 +78,16 @@ func FromEnvironmentalVariables() (Config, error) {
 		KeyLength:  uint32(argon2IDParameterKeyLength),
 	}
 	config := Config{
-		Port:              port,
-		CorsAllowOrigins:  corsAllowOrigins,
-		DatabaseURL:       databaseURL,
-		BaseURI:           baseURI,
-		AccessSecretKey:   accessSecretKey,
-		RefreshSecretKey:  refreshSecretKey,
-		EncryptionKey:     encryptionKey,
-		Argon2IDParameter: argon2IDParameter,
+		Port:                    port,
+		CorsAllowOrigins:        corsAllowOrigins,
+		DatabaseURL:             databaseURL,
+		BaseURI:                 baseURI,
+		AccessSecretKey:         accessSecretKey,
+		AccessTokenValidSeconds: accessTokenValidSeconds,
+		RefreshSecretKey:        refreshSecretKey,
+		RefreshTokenValidHours:  refreshTokenValidHours,
+		EncryptionKey:           encryptionKey,
+		Argon2IDParameter:       argon2IDParameter,
 	}
 	return config, nil
 }

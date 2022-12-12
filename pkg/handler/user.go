@@ -69,7 +69,7 @@ func (uh *UserHandler) HandleLogin(ctx *fiber.Ctx) error {
 	claims := jwt.MapClaims{
 		"iss":   fmt.Sprintf("%s/user", uh.Config.BaseURI),
 		"sub":   user.Id.String(),
-		"exp":   time.Now().Add(time.Second * 10).Unix(),
+		"exp":   time.Now().Add(time.Second * time.Duration(uh.Config.AccessTokenValidSeconds)).Unix(),
 		"iat":   time.Now().Unix(),
 		"admin": user.Admin,
 	}
@@ -77,7 +77,7 @@ func (uh *UserHandler) HandleLogin(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * time.Duration(uh.Config.RefreshTokenValidHours)).Unix()
 	refreshToken, err := cryptography.CreateJWT([]byte(uh.Config.RefreshSecretKey), claims)
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
@@ -116,7 +116,7 @@ func (uh *UserHandler) HandleRefresh(ctx *fiber.Ctx) error {
 	renewedClaims := jwt.MapClaims{
 		"iss":   fmt.Sprintf("%s/user", uh.Config.BaseURI),
 		"sub":   claims["sub"],
-		"exp":   time.Now().Add(time.Second * 10).Unix(),
+		"exp":   time.Now().Add(time.Second * time.Duration(uh.Config.AccessTokenValidSeconds)).Unix(),
 		"iat":   time.Now().Unix(),
 		"admin": claims["admin"],
 	}
