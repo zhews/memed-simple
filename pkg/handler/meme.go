@@ -25,17 +25,27 @@ func (mh *MemeHandler) HandleGetMemes(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	dtoMemes := make([]dto.MemeResponse, 0)
+	creatorCache := map[uuid.UUID]dto.UserResponse{}
 	for _, meme := range memes {
-		response, err := http.Get(fmt.Sprintf("%s%s/%s", mh.Config.UserMicroservice, mh.Config.UserEndpoint, meme.CreatedBy))
-		if err != nil {
-			log.Println("Could not get user information: ", err)
-			return ctx.SendStatus(fiber.StatusInternalServerError)
-		}
 		var creator dto.UserResponse
-		err = json.NewDecoder(response.Body).Decode(&creator)
-		if err != nil {
-			log.Println("Could not decode user information: ", err)
-			return ctx.SendStatus(fiber.StatusInternalServerError)
+		creator, ok := creatorCache[meme.CreatedBy]
+		if !ok {
+			response, err := http.Get(fmt.Sprintf("%s%s/%s", mh.Config.UserMicroservice, mh.Config.UserEndpoint, meme.CreatedBy))
+			if err != nil {
+				log.Println("Could not get user information: ", err)
+				return ctx.SendStatus(fiber.StatusInternalServerError)
+			}
+			var newCreator dto.UserResponse
+			err = json.NewDecoder(response.Body).Decode(&creator)
+			if err != nil {
+				log.Println("Could not decode user information: ", err)
+				return ctx.SendStatus(fiber.StatusInternalServerError)
+			}
+			creatorCache[meme.CreatedBy] = newCreator
+			err = response.Body.Close()
+			if err != nil {
+				log.Println("Could not close response body:", err)
+			}
 		}
 		dtoMeme := dto.MemeResponse{
 			Id:        meme.Id,
@@ -46,10 +56,6 @@ func (mh *MemeHandler) HandleGetMemes(ctx *fiber.Ctx) error {
 			UpdatedAt: meme.UpdatedAt,
 		}
 		dtoMemes = append(dtoMemes, dtoMeme)
-		err = response.Body.Close()
-		if err != nil {
-			log.Println("Could not close response body:", err)
-		}
 	}
 	return ctx.Status(fiber.StatusOK).JSON(dtoMemes)
 }
