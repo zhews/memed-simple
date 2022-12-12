@@ -21,17 +21,20 @@ type MemeHandler struct {
 func (mh *MemeHandler) HandleGetMemes(ctx *fiber.Ctx) error {
 	memes, err := mh.Service.GetMemes()
 	if err != nil {
+		log.Println("Could not get memes: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	dtoMemes := make([]dto.MemeResponse, 0)
 	for _, meme := range memes {
 		response, err := http.Get(fmt.Sprintf("%s%s/%s", mh.Config.UserMicroservice, mh.Config.UserEndpoint, meme.CreatedBy))
 		if err != nil {
+			log.Println("Could not get user information: ", err)
 			return ctx.SendStatus(fiber.StatusInternalServerError)
 		}
 		var creator dto.UserResponse
 		err = json.NewDecoder(response.Body).Decode(&creator)
 		if err != nil {
+			log.Println("Could not decode user information: ", err)
 			return ctx.SendStatus(fiber.StatusInternalServerError)
 		}
 		dtoMeme := dto.MemeResponse{
@@ -59,15 +62,18 @@ func (mh *MemeHandler) HandleGetMeme(ctx *fiber.Ctx) error {
 	}
 	meme, err := mh.Service.GetMemeById(id)
 	if err != nil {
+		log.Println("Could not get meme by id: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	response, err := http.Get(fmt.Sprintf("%s%s/%s", mh.Config.UserMicroservice, mh.Config.UserEndpoint, meme.CreatedBy))
 	if err != nil {
+		log.Println("Could not get user information: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	var creator dto.UserResponse
 	err = json.NewDecoder(response.Body).Decode(&creator)
 	if err != nil {
+		log.Println("Could not decode user information: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	dtoMeme := dto.MemeResponse{
@@ -95,16 +101,19 @@ func (mh *MemeHandler) HandleUploadMeme(ctx *fiber.Ctx) error {
 	memeFile, err := meme.Open()
 	token, ok := ctx.Locals("user").(*jwt.Token)
 	if !ok {
+		log.Println("Could not parse token from context: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	userIdString := claims["sub"].(string)
 	userId, err := uuid.Parse(userIdString)
 	if err != nil {
+		log.Println("Could not parse uuid from token: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	err = mh.Service.UploadMeme(title, contentType, memeFile, userId)
 	if err != nil {
+		log.Println("Could not upload file:", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	return ctx.SendStatus(fiber.StatusNoContent)
@@ -122,16 +131,19 @@ func (mh *MemeHandler) HandleUpdateMeme(ctx *fiber.Ctx) error {
 	}
 	token, ok := ctx.Locals("user").(*jwt.Token)
 	if !ok {
+		log.Println("Could not parse token from context: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	userIdString := claims["sub"].(string)
 	userId, err := uuid.Parse(userIdString)
 	if err != nil {
+		log.Println("Could not parse uuid from claims: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	err = mh.Service.UpdateMeme(id, request.Title, userId)
 	if err != nil {
+		log.Println("Could not update meme: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	return ctx.SendStatus(fiber.StatusNoContent)
@@ -145,6 +157,7 @@ func (mh *MemeHandler) HandleDeleteMeme(ctx *fiber.Ctx) error {
 	}
 	err = mh.Service.DeleteMeme(id)
 	if err != nil {
+		log.Println("Could not delete meme: ", err)
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
 	return ctx.SendStatus(fiber.StatusNoContent)
