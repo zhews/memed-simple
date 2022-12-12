@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
@@ -29,7 +30,6 @@ func TestUserRepositoryPostgres_GetById(t *testing.T) {
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
-	nonExistingUserId := uuid.New()
 	mock.ExpectQuery(queryBaseGetUserBy).
 		WithArgs(user.Id).
 		WillReturnRows(
@@ -43,9 +43,14 @@ func TestUserRepositoryPostgres_GetById(t *testing.T) {
 				user.UpdatedAt,
 			),
 		)
+	nonExistingUserId := uuid.New()
 	mock.ExpectQuery(queryBaseGetUserBy).
 		WithArgs(nonExistingUserId).
 		WillReturnError(pgx.ErrNoRows)
+	errorUserId := uuid.New()
+	mock.ExpectQuery(queryBaseGetUserBy).
+		WithArgs(errorUserId).
+		WillReturnError(errors.New("some error"))
 	type fields struct {
 		DB Conn
 	}
@@ -77,6 +82,17 @@ func TestUserRepositoryPostgres_GetById(t *testing.T) {
 			},
 			args: args{
 				id: nonExistingUserId,
+			},
+			want:    domain.User{},
+			wantErr: true,
+		},
+		{
+			name: "Database error",
+			fields: fields{
+				DB: mock,
+			},
+			args: args{
+				id: errorUserId,
 			},
 			want:    domain.User{},
 			wantErr: true,
@@ -117,7 +133,6 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
-	nonExistingUser := "nonExisting"
 	mock.ExpectQuery(queryBaseGetUserBy).
 		WithArgs(user.Username).
 		WillReturnRows(
@@ -131,9 +146,14 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 				user.UpdatedAt,
 			),
 		)
+	nonExistingUser := "nonExisting"
 	mock.ExpectQuery(queryBaseGetUserBy).
 		WithArgs(nonExistingUser).
 		WillReturnError(pgx.ErrNoRows)
+	errorUser := "error"
+	mock.ExpectQuery(queryBaseGetUserBy).
+		WithArgs(errorUser).
+		WillReturnError(errors.New("some error"))
 	type fields struct {
 		DB Conn
 	}
@@ -165,6 +185,17 @@ func TestUserRepositoryPostgres_GetByUsername(t *testing.T) {
 			},
 			args: args{
 				username: nonExistingUser,
+			},
+			want:    domain.User{},
+			wantErr: true,
+		},
+		{
+			name: "Database error",
+			fields: fields{
+				DB: mock,
+			},
+			args: args{
+				username: errorUser,
 			},
 			want:    domain.User{},
 			wantErr: true,
@@ -207,6 +238,9 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
+	mock.ExpectExec(queryBaseInsertUser).
+		WithArgs(user.Id, user.Username, user.Name, user.Admin, user.PasswordHash, user.CreatedAt, user.UpdatedAt).
+		WillReturnResult(pgxmock.NewResult("INSERT", 1))
 	duplicateUser := domain.User{
 		Id:           uuid.New(),
 		Username:     "zhews",
@@ -217,11 +251,14 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 		UpdatedAt:    now,
 	}
 	mock.ExpectExec(queryBaseInsertUser).
-		WithArgs(user.Id, user.Username, user.Name, user.Admin, user.PasswordHash, user.CreatedAt, user.UpdatedAt).
-		WillReturnResult(pgxmock.NewResult("INSERT", 1))
-	mock.ExpectExec(queryBaseInsertUser).
 		WithArgs(duplicateUser.Id, duplicateUser.Username, duplicateUser.Name, duplicateUser.Admin, duplicateUser.PasswordHash, duplicateUser.CreatedAt, duplicateUser.UpdatedAt).
 		WillReturnError(&pgconn.PgError{Code: pgerrcode.UniqueViolation})
+	errorUser := domain.User{
+		Name: "error",
+	}
+	mock.ExpectExec(queryBaseInsertUser).
+		WithArgs(errorUser.Id, errorUser.Username, errorUser.Name, errorUser.Admin, errorUser.PasswordHash, errorUser.CreatedAt, errorUser.UpdatedAt).
+		WillReturnError(errors.New("some error"))
 	type fields struct {
 		Conn Conn
 	}
@@ -251,6 +288,16 @@ func TestUserRepositoryPostgres_Insert(t *testing.T) {
 			},
 			args: args{
 				user: duplicateUser,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Database error",
+			fields: fields{
+				Conn: mock,
+			},
+			args: args{
+				user: errorUser,
 			},
 			wantErr: true,
 		},
