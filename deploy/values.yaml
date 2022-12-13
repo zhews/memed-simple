@@ -80,3 +80,8 @@ nodeSelector: { }
 tolerations: [ ]
 
 affinity: { }
+
+postgres-operator-ui:
+  envs:
+    teams:
+      - "memed"

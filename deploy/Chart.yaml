@@ -4,3 +4,10 @@ description: A Helm chart that allows the deployment of memed in Kubernetes
 type: application
 version: 0.1.0
 appVersion: "0.1.0"
+dependencies:
+  - name: postgres-operator
+    version: 1.8.2
+    repository: https://opensource.zalando.com/postgres-operator/charts/postgres-operator
+  - name: postgres-operator-ui
+    version: 1.8.2
+    repository: https://opensource.zalando.com/postgres-operator/charts/postgres-operator-ui
