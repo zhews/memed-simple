@@ -1,12 +1,7 @@
 package cryptography
 
 import (
-	"errors"
 	"github.com/golang-jwt/jwt/v4"
-)
-
-var (
-	ErrorInvalidToken = errors.New("token is invalid")
 )
 
 func CreateJWT(key []byte, claims jwt.MapClaims) (string, error) {
@@ -17,12 +12,9 @@ func CreateJWT(key []byte, claims jwt.MapClaims) (string, error) {
 
 func ValidateJWT(key []byte, signedToken string) (jwt.MapClaims, error) {
 	var claims jwt.MapClaims
-	token, err := jwt.ParseWithClaims(signedToken, &claims, getKeyFunc(key))
+	_, err := jwt.ParseWithClaims(signedToken, &claims, getKeyFunc(key))
 	if err != nil {
 		return nil, err
-	}
-	if !token.Valid {
-		return nil, ErrorInvalidToken
 	}
 	return claims, nil
 }
